@@ -1,19 +1,14 @@
 package io.smallrye.graphql.bootstrap;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import org.dataloader.BatchLoaderWithContext;
-
 import graphql.schema.DataFetcher;
-import io.smallrye.graphql.execution.datafetcher.CompletionStageDataFetcher;
-import io.smallrye.graphql.execution.datafetcher.DefaultDataFetcher;
-import io.smallrye.graphql.execution.datafetcher.MultiDataFetcher;
-import io.smallrye.graphql.execution.datafetcher.PublisherDataFetcher;
-import io.smallrye.graphql.execution.datafetcher.UniDataFetcher;
+import io.smallrye.graphql.execution.datafetcher.*;
 import io.smallrye.graphql.schema.model.Field;
 import io.smallrye.graphql.schema.model.Operation;
 import io.smallrye.graphql.schema.model.Wrapper;
+import org.dataloader.BatchLoaderWithContext;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Create the datafetchers for a certain operation
@@ -33,7 +28,7 @@ public class DataFetcherFactory {
     public Wrapper unwrap(Field field, boolean isBatch) {
         if (isAsync(field) && isBatch) {
             return field.getWrapper().getWrapper().getWrapper();
-        } else if (isAsync(field)) {
+        } else if (isAsync(field) && !isCoroutine(field)) {
             return field.getWrapper().getWrapper();
         } else if (isBatch) {
             return field.getWrapper().getWrapper();
@@ -45,7 +40,7 @@ public class DataFetcherFactory {
         return null;
     }
 
-    // TODO: Have some way to load custom ?    
+    // TODO: Have some way to load custom ?
     private <V> V get(Operation operation) {
         if (isCompletionStage(operation)) {
             return (V) new CompletionStageDataFetcher(operation);
@@ -55,6 +50,14 @@ public class DataFetcherFactory {
             return (V) new PublisherDataFetcher(operation);
         } else if (isMutinyMulti(operation)) {
             return (V) new MultiDataFetcher(operation);
+        } else if (isCoroutine(operation)) {
+            try {
+                Class.forName("io.smallrye.graphql.execution.datafetcher.CoroutineDataFetcher");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            return (V) new CoroutineDataFetcher(operation);
         }
         return (V) new DefaultDataFetcher(operation);
     }
@@ -92,6 +95,14 @@ public class DataFetcherFactory {
         if (field.hasWrapper()) {
             String wrapperClassName = field.getWrapper().getWrapperClassName();
             return wrapperClassName.equals("io.smallrye.mutiny.Multi");
+        }
+        return false;
+    }
+
+    private boolean isCoroutine(Field field) {
+        if (field.hasWrapper()) {
+            String wrapperClassName = field.getWrapper().getWrapperClassName();
+            return wrapperClassName.equals("kotlin.coroutines.Continuation");
         }
         return false;
     }

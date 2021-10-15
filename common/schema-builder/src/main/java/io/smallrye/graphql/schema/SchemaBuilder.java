@@ -252,7 +252,7 @@ public class SchemaBuilder {
                 Operation query = operationCreator.createOperation(methodInfo, OperationType.QUERY, null);
                 if (group.isPresent()) {
                     schema.addGroupedQuery(group.get(), query);
-                } else {
+                } else if (query != null) {
                     schema.addQuery(query);
                 }
             } else if (annotationsForMethod.containsOneOfTheseAnnotations(Annotations.MUTATION)) {

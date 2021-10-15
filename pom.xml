@@ -40,6 +40,8 @@
         <version.hibernate-validator>6.2.0.Final</version.hibernate-validator>
         <version.glasfish-el>3.0.3</version.glasfish-el>
         <version.mockito>4.0.0</version.mockito>
+<!--        used only in coroutine test -->
+        <version.kotlin>1.5.31</version.kotlin>
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/tck/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../tck/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <slf4j-jboss-logging.version>1.2.1.Final</slf4j-jboss-logging.version>
@@ -72,7 +74,7 @@
         <module>tools</module>
         <module>power-annotations</module>
     </modules>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -105,13 +107,13 @@
                 <artifactId>microprofile-graphql-tck</artifactId>
                 <version>${version.eclipse.microprofile.graphql}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.eclipse.microprofile.graphql</groupId>
                 <artifactId>microprofile-graphql-server-tck</artifactId>
                 <version>${version.eclipse.microprofile.graphql}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.eclipse.microprofile.config</groupId>
                 <artifactId>microprofile-config-api</artifactId>
@@ -173,6 +175,12 @@
 
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
+                <artifactId>mutiny-kotlin</artifactId>
+                <version>${version.smallrye-mutiny}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.smallrye.reactive</groupId>
                 <artifactId>mutiny-smallrye-context-propagation</artifactId>
                 <version>${version.smallrye-mutiny}</version>
             </dependency>
@@ -207,7 +215,7 @@
                 <artifactId>vertx-web-client</artifactId>
                 <version>${version.vertx}</version>
             </dependency>
-            
+
             <!-- Dependencies provided by the project -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -362,7 +370,7 @@
                         <arg>loopback</arg>
                     </gpgArguments>
                 </configuration>
-            </plugin>         
+            </plugin>
         </plugins>
     </build>
 
@@ -400,7 +408,7 @@
                 <module>release</module>
             </modules>
         </profile>
-        
+
         <profile>
             <id>jdk11plus</id>
             <activation>

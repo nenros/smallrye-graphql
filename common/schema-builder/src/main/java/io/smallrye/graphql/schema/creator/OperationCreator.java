@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Optional;
 
+import io.smallrye.graphql.schema.Classes;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
@@ -48,6 +49,10 @@ public class OperationCreator {
     public Operation createOperation(MethodInfo methodInfo, OperationType operationType,
             final io.smallrye.graphql.schema.model.Type type) {
 
+        if (methodInfo.name().contains("$suspendImpl")) {
+            return null;
+        }
+
         if (!Modifier.isPublic(methodInfo.flags())) {
             throw new IllegalArgumentException(
                     "Method " + methodInfo.declaringClass().name().toString() + "#" + methodInfo.name()
@@ -56,6 +61,12 @@ public class OperationCreator {
 
         Annotations annotationsForMethod = Annotations.getAnnotationsForMethod(methodInfo);
         Type fieldType = methodInfo.returnType();
+
+        if (fieldType.name().withoutPackagePrefix().equals(Classes.OBJECT.withoutPackagePrefix())) {
+            fieldType = methodInfo.parameters().stream()
+                    .filter(it -> it.name().equals(Classes.KOTLIN_CONTINUATION))
+                    .findFirst().orElse(fieldType);
+        }
 
         // Name
         String name = getOperationName(methodInfo, operationType, annotationsForMethod);

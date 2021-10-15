@@ -128,7 +128,9 @@ abstract class AbstractCreator implements Creator<Type> {
             for (MethodParameterInfo methodParameterInfo : methodParameterInfos) {
                 MethodInfo methodInfo = methodParameterInfo.method();
                 Operation o = operationCreator.createOperation(methodInfo, OperationType.QUERY, type);
-                operations.put(o.getName(), o);
+                if (o != null) {
+                    operations.put(o.getName(), o);
+                }
             }
         }
         for (Reference anInterface : type.getInterfaces()) {
@@ -138,7 +140,9 @@ abstract class AbstractCreator implements Creator<Type> {
                 for (MethodParameterInfo methodParameterInfo : methodParameterInfos) {
                     MethodInfo methodInfo = methodParameterInfo.method();
                     Operation o = operationCreator.createOperation(methodInfo, OperationType.QUERY, type);
-                    operations.put(o.getName(), o);
+                    if (o != null) {
+                        operations.put(o.getName(), o);
+                    }
                 }
             }
         }
